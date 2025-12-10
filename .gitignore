@@ -1,8 +1,6 @@
 .env
 venv/
-company-batch-1-2115025.csv
-company-batch-2-2115037.csv
-company-batch-3-linkedin-2115110.csv
+data/
 recipients.csv
 smtp credentials.txt
 email_automation.db
