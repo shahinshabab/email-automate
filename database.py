@@ -3,10 +3,12 @@ import sqlite3
 from pathlib import Path
 from config import DB_PATH
 
+
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def init_db():
     conn = get_connection()
@@ -31,13 +33,14 @@ def init_db():
         """
     )
 
-    # Send log: one row per send attempt
+    # Send log: one row per send attempt (with campaign column)
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS send_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipient_id INTEGER NOT NULL,
             batch_date TEXT NOT NULL, -- YYYY-MM-DD
+            campaign TEXT NOT NULL,   -- e.g. 'initial', 'followup1'
             status TEXT NOT NULL,     -- sent/failed
             message_id TEXT,
             error TEXT,
@@ -50,6 +53,7 @@ def init_db():
     conn.commit()
     conn.close()
     print(f"DB initialized at {DB_PATH}")
+
 
 if __name__ == "__main__":
     init_db()

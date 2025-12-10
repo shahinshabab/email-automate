@@ -45,177 +45,6 @@ GREETING_VARIANTS = [
     </p>
     """,
 
-    # Variant 2
-    """
-    <p style="margin:12px 0;">Hi {first_name},</p>
-
-    <p style="margin:12px 0;">
-      I am contacting you regarding potential data analyst roles at {company}.
-      My experience focuses on using SQL, Python, and Power BI/Tableau
-      to answer business questions and present results in a simple, visual format.
-    </p>
-
-    <p style="margin:12px 0;">
-      I have worked on projects that automated recurring reports, created performance dashboards,
-      and combined data from different sources into one consistent view. I enjoy making sure that
-      decision-makers can quickly see what is happening in the numbers.
-    </p>
-
-    <p style="margin:12px 0;">
-      I am keen to contribute in a role where I can maintain reliable dashboards, build new analyses,
-      and help teams monitor their KPIs with confidence.
-    </p>
-    """,
-
-    # Variant 3
-    """
-    <p style="margin:12px 0;">Dear {first_name},</p>
-
-    <p style="margin:12px 0;">
-      I am writing to share my interest in joining {company} as a data analyst.
-      I work primarily with SQL, Python, and Power BI/Tableau, focusing on
-      building clear dashboards and automating regular reporting tasks.
-    </p>
-
-    <p style="margin:12px 0;">
-      In recent projects, I have prepared datasets from different systems, built models for tracking
-      performance, and created visuals that highlight trends, variances, and outliers. My goal is always
-      to make complex information easier to understand.
-    </p>
-
-    <p style="margin:12px 0;">
-      I am particularly motivated by roles where I can support day-to-day business decisions, improve
-      report accuracy, and help teams move from manual reports to more automated analytics.
-    </p>
-    """,
-
-    # Variant 4
-    """
-    <p style="margin:12px 0;">Hi {first_name},</p>
-
-    <p style="margin:12px 0;">
-      I hope this message finds you well. I am exploring opportunities as a data analyst
-      at {company}. My background includes working with SQL, Python, and Power BI/Tableau
-      to support reporting and monitoring for different business functions.
-    </p>
-
-    <p style="margin:12px 0;">
-      I have experience building data pipelines for regular reports, preparing datasets for analysis,
-      and publishing dashboards that help teams follow their key metrics. I enjoy working closely with
-      stakeholders to understand what they need from the data.
-    </p>
-
-    <p style="margin:12px 0;">
-      I am interested in roles where I can help maintain data quality, streamline reporting processes,
-      and provide timely insights for management and operational teams.
-    </p>
-    """,
-
-    # Variant 5
-    """
-    <p style="margin:12px 0;">Dear {first_name},</p>
-
-    <p style="margin:12px 0;">
-      I am reaching out to express my interest in data analyst opportunities with {company}.
-      I use SQL and Python for data preparation and analysis, and Power BI/Tableau for building dashboards
-      that summarize results clearly.
-    </p>
-
-    <p style="margin:12px 0;">
-      My work has included automating weekly and monthly performance reports, tracking KPIs against
-      targets, and visualizing trends that help teams see where to focus their efforts.
-    </p>
-
-    <p style="margin:12px 0;">
-      I would welcome the chance to apply these skills in a role where I can support reporting,
-      performance analysis, and data-driven planning at {company}.
-    </p>
-    """,
-
-    # Variant 6
-    """
-    <p style="margin:12px 0;">Hi {first_name},</p>
-
-    <p style="margin:12px 0;">
-      I am contacting you to introduce myself as a data analyst candidate interested
-      in roles at {company}. I have hands-on experience with SQL, Python, and Power BI/Tableau,
-      with a focus on building reliable reports and dashboards.
-    </p>
-
-    <p style="margin:12px 0;">
-      Recently, I have worked on projects that turned raw operational and financial data into structured
-      datasets and interactive visualizations. These helped stakeholders monitor performance and identify
-      changes early.
-    </p>
-
-    <p style="margin:12px 0;">
-      I am interested in positions where I can contribute to regular reporting, ad-hoc analysis, and
-      ongoing monitoring of key business metrics.
-    </p>
-    """,
-
-    # Variant 7
-    """
-    <p style="margin:12px 0;">Dear {first_name},</p>
-
-    <p style="margin:12px 0;">
-      I am writing to explore potential data analyst roles at {company}.
-      My skills are centered on SQL, Python, and Power BI/Tableau, and I focus on presenting
-      information in a way that is practical for business users.
-    </p>
-
-    <p style="margin:12px 0;">
-      I have been involved in building dashboards for tracking KPIs, cleaning and joining data from
-      multiple sources, and creating summaries that support both operational and management decisions.
-    </p>
-
-    <p style="margin:12px 0;">
-      I would be glad to contribute in a role where I can work closely with teams to design reports,
-      maintain dashboards, and provide clear explanations of the underlying data.
-    </p>
-    """,
-
-    # Variant 8
-    """
-    <p style="margin:12px 0;">Hi {first_name},</p>
-
-    <p style="margin:12px 0;">
-      I hope you are well. I am interested in discussing data analyst roles with {company}.
-      I use SQL and Python for analysis, and Power BI/Tableau to communicate results through
-      dashboards and reports.
-    </p>
-
-    <p style="margin:12px 0;">
-      My recent work has included building recurring performance dashboards, setting up reporting logic,
-      and simplifying complex datasets so that they can be monitored easily over time.
-    </p>
-
-    <p style="margin:12px 0;">
-      I am keen to support teams at {company} by helping them track performance, understand trends, and
-      make decisions based on clear, reliable data.
-    </p>
-    """,
-
-    # Variant 9
-    """
-    <p style="margin:12px 0;">Dear {first_name},</p>
-
-    <p style="margin:12px 0;">
-      I am reaching out regarding potential data analyst openings at {company}.
-      I work across SQL, Python, and Power BI/Tableau to support data preparation, analysis, and reporting.
-    </p>
-
-    <p style="margin:12px 0;">
-      I have contributed to projects that required building end-to-end reporting flows, from collecting
-      and cleaning data to publishing dashboards that highlight key results for stakeholders.
-    </p>
-
-    <p style="margin:12px 0;">
-      I would be interested in any opportunity where I can help maintain consistent reporting,
-      improve data visibility, and provide insights for business and operations teams.
-    </p>
-    """,
-
     # Variant 10
     """
     <p style="margin:12px 0;">Hi {first_name},</p>
@@ -303,4 +132,14 @@ def build_html_body(recipient_row):
     </div>
   </body>
 </html>
+    """.strip()
+
+
+def build_followup_html_body(recipient_row):
+    first_name = recipient_row.get("first_name") or "there"
+    company = recipient_row.get("company") or "your team"
+
+    # write a shorter follow-up style message here
+    return f"""
+    <html>... follow-up text using {first_name} and {company} ...</html>
     """.strip()

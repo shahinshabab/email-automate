@@ -14,9 +14,11 @@ from config import (
     AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY,
     AWS_SESSION_TOKEN,
+    CAMPAIGN_NAME,   # NEW
 )
+
 from database import get_connection
-from email_templates import build_subject, build_html_body
+from email_templates import build_subject, build_html_body, build_followup_html_body
 
 
 def get_today_iso():
@@ -37,18 +39,26 @@ def get_already_sent_today(conn, today):
     return row["cnt"] if row else 0
 
 
-def pick_recipients_to_send(conn, remaining_limit):
+def pick_recipients_to_send(conn, remaining_limit, campaign):
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT * FROM recipients
-        WHERE status = 'pending'
-        ORDER BY id
+        SELECT r.*
+        FROM recipients r
+        WHERE r.status != 'failed'  -- optional: skip permanently failed
+          AND NOT EXISTS (
+              SELECT 1 FROM send_log s
+              WHERE s.recipient_id = r.id
+                AND s.campaign = ?
+                AND s.status = 'sent'
+          )
+        ORDER BY r.id
         LIMIT ?
         """,
-        (remaining_limit,),
+        (campaign, remaining_limit),
     )
     return cur.fetchall()
+
 
 
 def mark_recipient_status(conn, recipient_id, status, error_msg=None):
@@ -76,16 +86,17 @@ def mark_recipient_status(conn, recipient_id, status, error_msg=None):
     conn.commit()
 
 
-def log_send(conn, recipient_id, batch_date, status, message_id=None, error=None):
+def log_send(conn, recipient_id, batch_date, campaign, status, message_id=None, error=None):
     cur = conn.cursor()
     cur.execute(
         """
-        INSERT INTO send_log (recipient_id, batch_date, status, message_id, error)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO send_log (recipient_id, batch_date, campaign, status, message_id, error)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (recipient_id, batch_date, status, message_id, error),
+        (recipient_id, batch_date, campaign, status, message_id, error),
     )
     conn.commit()
+
 
 
 def send_email_ses(ses_client, sender, recipient_email, subject, html_body):
@@ -140,7 +151,8 @@ def main():
         conn.close()
         return
 
-    recipients = pick_recipients_to_send(conn, remaining)
+    recipients = pick_recipients_to_send(conn, remaining, CAMPAIGN_NAME)
+
     if not recipients:
         print("No pending recipients. Exiting.")
         conn.close()
@@ -158,25 +170,31 @@ def main():
 
         email = row["email"]
         subject = build_subject(row)
-        html_body = build_html_body(row)
+        
+        if CAMPAIGN_NAME == "initial":
+            html_body = build_html_body(row)
+        elif CAMPAIGN_NAME == "followup1":
+            html_body = build_followup_html_body(row)
+        else:
+            html_body = build_html_body(row) 
 
         print(f"[{idx}/{len(recipients)}] Sending to {email} ...")
 
         if DRY_RUN:
             # Simulate success
             message_id = f"dry-run-{email}-{int(time.time())}"
-            log_send(conn, row["id"], today, "sent", message_id=message_id, error=None)
+            log_send(conn, row["id"], today, CAMPAIGN_NAME, "sent", message_id=message_id, error=None)
             mark_recipient_status(conn, row["id"], "sent")
             print("DRY RUN: marked as sent (no real email).")
         else:
             try:
                 message_id = send_email_ses(ses_client, AWS_SES_SENDER, email, subject, html_body)
-                log_send(conn, row["id"], today, "sent", message_id=message_id, error=None)
+                log_send(conn, row["id"], today, CAMPAIGN_NAME, "sent", message_id=message_id, error=None)
                 mark_recipient_status(conn, row["id"], "sent")
                 print(f"Sent OK. MessageId={message_id}")
             except ClientError as e:
                 err = str(e)
-                log_send(conn, row["id"], today, "failed", message_id=None, error=err)
+                log_send(conn, row["id"], today, CAMPAIGN_NAME, "failed", message_id=None, error=err)
                 mark_recipient_status(conn, row["id"], "failed", error_msg=err)
                 print(f"FAILED to {email}: {err}")
 

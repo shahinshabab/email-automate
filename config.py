@@ -26,3 +26,6 @@ DELAY_SECONDS = float(os.getenv("DELAY_SECONDS", "5"))
 
 # Safety flag for testing
 DRY_RUN = os.getenv("DRY_RUN", "true").lower() == "true"
+
+# Which campaign/wave is this run?
+CAMPAIGN_NAME = os.getenv("CAMPAIGN_NAME", "initial")

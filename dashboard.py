@@ -12,6 +12,7 @@ def load_data(start_date: dt.date, end_date: dt.date) -> pd.DataFrame:
     query = """
         SELECT
             sl.batch_date,
+            sl.campaign,              -- NEW: which campaign/wave
             sl.status AS send_status,
             sl.message_id,
             sl.error,
@@ -56,19 +57,42 @@ def main():
         st.info("No send logs for this period.")
         return
 
-    # Summary metrics
+    # Summary metrics (overall)
     total_sent = (df["send_status"] == "sent").sum()
     total_failed = (df["send_status"] == "failed").sum()
     unique_recipients = df["email"].nunique()
 
-    st.subheader("Summary")
+    st.subheader("Summary (overall)")
     c1, c2, c3 = st.columns(3)
     c1.metric("Total sent", total_sent)
     c2.metric("Total failed", total_failed)
     c3.metric("Unique recipients", unique_recipients)
 
+    # --- NEW: summary by campaign ---
+    st.subheader("Summary by campaign")
+
+    # Group by campaign + status (sent/failed)
+    by_campaign = (
+        df.groupby(["campaign", "send_status"])
+        .size()
+        .unstack(fill_value=0)
+        .reset_index()
+    )
+
+    # Ensure columns exist even if 0
+    if "sent" not in by_campaign.columns:
+        by_campaign["sent"] = 0
+    if "failed" not in by_campaign.columns:
+        by_campaign["failed"] = 0
+
+    by_campaign = by_campaign[["campaign", "sent", "failed"]]
+
+    st.dataframe(by_campaign, use_container_width=True)
+
+    # --- Details table (each send, including campaign) ---
     st.subheader("Details")
-    st.dataframe(df)
+    st.dataframe(df, use_container_width=True)
+
 
 if __name__ == "__main__":
     main()
