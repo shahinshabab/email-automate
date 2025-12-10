@@ -1,0 +1,195 @@
+# ✅ **PROJECT SUMMARY — EMAIL AUTOMATION SYSTEM (FOR AI MODELS)**
+
+## **🔹 Overview**
+
+I am building an **Email Automation System** to send personalized outreach emails (job templates, HR emails, etc.) in controlled batches every day.
+The system must run on **my laptop for testing**, and later run **automatically every day on an AWS EC2 instance** using cron jobs.
+
+The goals are:
+
+* Send personalized HTML email templates using **Amazon SES**.
+* Read recipients from a CSV file, generate templates dynamically, and store them in SQLite.
+* Avoid duplicates: once an email is sent, it should **never** be sent again.
+* Limit daily sending (e.g., 80/day).
+* Add delays between emails (e.g., 5 seconds) so SES reputation remains safe.
+* Have a **Streamlit Dashboard** showing logs, status, errors, and filters by date.
+* Use the **same codebase** for laptop + EC2 (no changes required).
+
+---
+
+## **🔹 System Architecture (High-Level)**
+
+### **1. Input: CSV File**
+
+* Contains: email, first_name, last_name, company, custom_subject, custom_body, etc.
+* CSV is parsed and inserted into SQLite.
+* Duplicate emails are automatically skipped.
+
+### **2. SQLite Database (Local or EC2)**
+
+Two tables:
+
+#### **`recipients`**
+
+Tracks each target email:
+
+* email
+* first_name, last_name, company
+* custom subject/body (optional)
+* status → pending / sent / failed
+* last_error
+* sent_at timestamp
+
+#### **`send_log`**
+
+Tracks each send attempt:
+
+* batch_date (YYYY-MM-DD)
+* status → sent / failed
+* message_id (SES response)
+* error details
+* linked to `recipients.id`
+
+---
+
+## **🔹 Email Sending Logic**
+
+### **Daily Flow**
+
+The script runs daily at **8 AM** (cron job on EC2):
+
+1. Check how many emails were already sent today from `send_log`.
+2. Calculate remaining (e.g., 80 total – 32 already sent = 48 left).
+3. Pull up to `remaining_limit` rows from `recipients WHERE status='pending'`.
+4. For each:
+
+   * Build personalized **subject** and **HTML body**.
+   * Send via **SES**.
+   * Log results into `send_log`.
+   * Update `recipients.status` to sent/failed.
+   * Sleep `DELAY_SECONDS` between each send.
+
+### **Safety Features**
+
+* `DRY_RUN` mode for safe testing.
+* Daily quota prevents SES reputation issues.
+* No duplicates (already sent entries are skipped forever).
+* SQLite ensures persistent state even after reboot.
+
+---
+
+## **🔹 Streamlit Dashboard**
+
+A real-time monitoring app that reads from SQLite:
+
+Features:
+
+* Date filter (start → end)
+* Summary metrics:
+
+  * total sent
+  * total failed
+  * unique recipients
+* Complete log table with:
+
+  * batch_date
+  * status
+  * email
+  * message_id
+  * custom_subject
+  * error message
+* Runs locally or on EC2.
+
+---
+
+## **🔹 Deployment Plan (Laptop → EC2)**
+
+### **Step 1: Local Testing**
+
+* Create environment
+* Initialize SQLite
+* Import CSV
+* Enable DRY_RUN
+* Test sending flow
+* View logs in Streamlit dashboard
+
+### **Step 2: Move to EC2**
+
+* Copy the same folder
+* Install Python deps
+* Set environment variables (.bashrc or env.sh)
+* Set up AWS credentials
+* Enable cron:
+
+```
+0 8 * * * cd /home/ubuntu/email_automation && . venv/bin/activate && . ./env.sh && python run_daily.py >> cron.log 2>&1
+```
+
+### **Step 3: Production**
+
+Now EC2 sends emails daily at 8 AM without your involvement.
+
+---
+
+## **🔹 Full File Structure**
+
+```
+email_automation/
+    config.py
+    database.py
+    import_csv.py
+    email_templates.py
+    run_daily.py
+    dashboard.py
+    recipients.csv
+    email_automation.db
+    env.sh (on EC2)
+```
+
+---
+
+## **🔹 Technologies Used**
+
+* **Python**
+* **Amazon SES**
+* **SQLite3**
+* **Streamlit**
+* **Cron**
+* **EC2 (Ubuntu)**
+
+---
+
+## **🔹 Key Requirements for Code**
+
+Any AI model should follow these points when generating or modifying code:
+
+1. Must be compatible with both **local testing** and **EC2 production** without changing logic.
+2. Email sending must always:
+
+   * respect daily limit
+   * avoid duplicates
+   * apply delay per email
+3. Database must always log:
+
+   * sent/failed status
+   * message ID
+   * error message
+4. Dashboard must read only from SQLite.
+5. Code must be modular:
+
+   * run_daily.py → main automation engine
+   * database.py → DB helpers
+   * email_templates.py → HTML builder
+   * import_csv.py → CSV loader
+
+---
+
+## **🔹 Future Scalability (Optional)**
+
+AI should also support expansions like:
+
+* Multi-campaign support
+* Per-company custom templates
+* Track opens/clicks
+* Use SES Sandbox → Production migration
+* Add Streamlit admin actions (pause campaign, skip recipient, retry failures)
