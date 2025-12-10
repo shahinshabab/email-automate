@@ -3,19 +3,14 @@ import random
 
 
 def build_subject(recipient_row):
-    """
-    Build the email subject line.
-
-    Priority:
-    1. Use custom_subject if present.
-    2. Fallback to a friendly default including company when available.
-    """
     custom_subject = recipient_row.get("custom_subject")
     if custom_subject:
         return custom_subject
 
-    name = recipient_row.get("first_name") or "there"
-    company = recipient_row.get("company") or "your team"
+    name = (recipient_row.get("first_name") or "there").strip()
+
+    company_raw = recipient_row.get("company") or ""
+    company = company_raw.strip() or "your team"
 
     return f"Data Analyst Application for {company} – From Shahin (Hi {name})"
 
@@ -239,15 +234,12 @@ GREETING_VARIANTS = [
 ]
 
 
+
 def build_html_body(recipient_row):
-    """
-    Build a simple, personal-style HTML body with:
-    - Randomised intro block
-    - Plain summary (no tables / cards)
-    - Only ONE link (portfolio)
-    """
-    first_name = recipient_row.get("first_name") or "there"
-    company = recipient_row.get("company") or "your team"
+    first_name = (recipient_row.get("first_name") or "there").strip()
+
+    company_raw = recipient_row.get("company") or ""
+    company = company_raw.strip() or "your team"
 
     intro_block = random.choice(GREETING_VARIANTS).format(
         first_name=first_name,
@@ -303,4 +295,14 @@ def build_html_body(recipient_row):
     </div>
   </body>
 </html>
+    """.strip()
+
+
+def build_followup_html_body(recipient_row):
+    first_name = recipient_row.get("first_name") or "there"
+    company = recipient_row.get("company") or "your team"
+
+    # write a shorter follow-up style message here
+    return f"""
+    <html>... follow-up text using {first_name} and {company} ...</html>
     """.strip()

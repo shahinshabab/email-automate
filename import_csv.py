@@ -1,5 +1,3 @@
-# import_csv.py
-
 import csv
 from pathlib import Path
 from database import get_connection
@@ -9,9 +7,32 @@ from database import get_connection
 CSV_FILENAME = "recipients.csv"
 # ---------------------------------------------------------
 
-# Automatically resolve the CSV path in the SAME directory
 BASE_DIR = Path(__file__).resolve().parent
 CSV_PATH = BASE_DIR / CSV_FILENAME
+
+# Possible column names for company/organization
+COMPANY_HEADERS = [
+    "Company",
+    "company",
+    "Company name",
+    "Company Name",
+    "Organization",
+    "Organization name",
+    "Org",
+    "Domain name",
+    "Input domain name",
+    "Domain",
+]
+
+
+def get_first_nonempty(row, keys):
+    """Helper: return first non-empty cell from a list of possible header names."""
+    for key in keys:
+        if key in row and row[key]:
+            value = row[key].strip()
+            if value:
+                return value
+    return ""
 
 
 def import_csv(csv_path: Path):
@@ -19,10 +40,10 @@ def import_csv(csv_path: Path):
     Import recipients from a CSV located in the same directory.
 
     Expected columns (any of these variants are accepted):
-    - Email address, email
-    - First name, first_name
-    - Last name, last_name
-    - Organization, Domain name, Input domain name
+    - Email address, email, Email
+    - First name, first_name, First
+    - Last name, last_name, Last
+    - Company / Organization / Domain...
     """
 
     if not csv_path.exists():
@@ -37,8 +58,9 @@ def import_csv(csv_path: Path):
         imported = 0
         skipped_duplicates = 0
 
-        for row in reader:
+        print(f"[INFO] CSV columns: {reader.fieldnames}")
 
+        for row in reader:
             # -------- Email (required) --------
             email = (
                 row.get("Email address")
@@ -48,7 +70,7 @@ def import_csv(csv_path: Path):
             ).strip()
 
             if not email:
-                continue  # Skip rows without email
+                continue
 
             # -------- Names --------
             first_name = (
@@ -66,14 +88,12 @@ def import_csv(csv_path: Path):
             ).strip()
 
             # -------- Company / Organization --------
-            company = (
-                row.get("Organization")
-                or row.get("Domain name")
-                or row.get("Input domain name")
-                or ""
-            ).strip()
+            company = get_first_nonempty(row, COMPANY_HEADERS)
 
-            # No custom template in CSV (handled in email builder)
+            if not company:
+                # Optional: log once per row so you see which ones are missing
+                print(f"[WARN] No company found for {email}")
+
             custom_subject = None
             custom_body = None
 
@@ -85,7 +105,6 @@ def import_csv(csv_path: Path):
                 skipped_duplicates += 1
                 continue
 
-            # -------- Insert new recipient --------
             cur.execute(
                 """
                 INSERT INTO recipients

@@ -2,5 +2,6 @@
 venv/
 data/
 recipients.csv
+recipients copy.csv
 smtp credentials.txt
 email_automation.db
