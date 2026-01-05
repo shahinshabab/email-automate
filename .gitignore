@@ -5,3 +5,5 @@ recipients.csv
 recipients copy.csv
 smtp credentials.txt
 email_automation.db
+email-automate.code-workspace
+steps.txt
